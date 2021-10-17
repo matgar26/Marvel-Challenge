@@ -91,7 +91,6 @@ extension CharacterSearchResultsViewController: UICollectionViewDelegate {
         guard let item = dataSource.itemIdentifier(for: indexPath) else { return }
         switch item {
         case .character(let character):
-            currentlySelectedIndex = indexPath
             self.searchSelection.send(character)
         default: break
         }
