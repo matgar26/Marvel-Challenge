@@ -15,6 +15,8 @@ class CharacterSearchResultsViewController: UIViewController {
     let viewModel: CharacterSearchResultsViewModel = CharacterSearchResultsViewModel()
     private lazy var dataSource = createDataSource()
     
+    var searchSelection = PassthroughSubject<CharacterDTO, Never>()
+
     init() {
         super.init(nibName: "CharacterSearchResultsViewController", bundle: .main)
     }
@@ -88,7 +90,9 @@ extension CharacterSearchResultsViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard let item = dataSource.itemIdentifier(for: indexPath) else { return }
         switch item {
-        case .character(let character): break
+        case .character(let character):
+            currentlySelectedIndex = indexPath
+            self.searchSelection.send(character)
         default: break
         }
     }
