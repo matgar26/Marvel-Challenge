@@ -1,0 +1,17 @@
+//
+//  Production.xcconfig
+//  OneDropChallenge
+//
+//  Created by Matt Gardner on 10/9/21.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://help.apple.com/xcode/#/dev745c5c974
+
+
+// URLS
+BASE_URL = https:/$()/gateway.marvel.com/v1/public/
+
+// Keys
+PRIVATE_KEY = b36712bf691afc751e5faac7ca86da720b497665
+PUBLIC_KEY = 760a4d58dcef0a054dbbecdc66e9d0ae
