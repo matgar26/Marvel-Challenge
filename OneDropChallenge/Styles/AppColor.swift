@@ -11,7 +11,8 @@ import UIKit
 public struct AppColor {
     
     public static let marvelRed: UIColor = colorNamed("MarvelRed")
-    public static let marvelBlack: UIColor = colorNamed("MarvelBlack")
+    public static let marvelPrimary: UIColor = colorNamed("MarvelPrimary")
+    public static let marvelSecondary: UIColor = colorNamed("MarvelSecondary")
     
     static func colorNamed(_ name: String?) -> UIColor {
         guard let n = name else { return UIColor() }

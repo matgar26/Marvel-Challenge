@@ -17,7 +17,10 @@ class CharecterListViewController: UIViewController {
     private let viewModel: CharecterListViewModel = CharecterListViewModel()
     private lazy var dataSource = createDataSource()
     
+    private var searchSelection = PassthroughSubject<CharacterDTO, Never>()
+    
     var searchTextTimer: Timer?
+    var currentlySelectedIndex: IndexPath?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -37,6 +40,13 @@ class CharecterListViewController: UIViewController {
         definesPresentationContext = true
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        if let index = currentlySelectedIndex, traitCollection.horizontalSizeClass == .compact {
+            collectionView.deselectItem(at: index, animated: true)
+        }
+    }
+    
     private func setupCollectionView() {
         collectionView.collectionViewLayout = createCompositionalLayout()
         collectionView.delegate = self
@@ -54,11 +64,17 @@ class CharecterListViewController: UIViewController {
             self?.collectionView.refreshControl?.endRefreshing()
             self?.applySnapshot(animatingDifferences: false)
         }
+        
+        let searchSelectionSubscriber = self.searchSelection.receive(on: DispatchQueue.main).sink() { [weak self] character in
+            self?.showCharacterDetail(character)
+        }
+        
         cancellables.append(reloadCancellable)
+        cancellables.append(searchSelectionSubscriber)
     }
     
     private func setupSearchController() {
-        searchController = UISearchController(searchResultsController: ViewControllerManager.shared.charecterSearchResultsController())
+        searchController = UISearchController(searchResultsController: ViewControllerManager.shared.charecterSearchResultsController(searchSelection: self.searchSelection))
         searchController.obscuresBackgroundDuringPresentation = true
         searchController.hidesNavigationBarDuringPresentation = false
         searchController.searchResultsUpdater = self
@@ -170,14 +186,15 @@ extension CharecterListViewController: UICollectionViewDelegate, NSFetchedResult
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         switch dataSource.itemIdentifier(for: indexPath) {
         case let character as CharacterDTO:
-            let cell = collectionView.cellForItem(at: indexPath) as? CharecterCollectionViewCell
-            cell?.animate() {
-                let vc = ViewControllerManager.shared.characterDetailViewController(character: character)
-                self.splitViewController?.showDetailViewController(vc, sender: self)
-            }
-
+            currentlySelectedIndex = indexPath
+            self.showCharacterDetail(character)
         default: break
         }
+    }
+    
+    private func showCharacterDetail( _ character: CharacterDTO) {
+        let vc = ViewControllerManager.shared.characterDetailViewController(character: character)
+        self.splitViewController?.showDetailViewController(vc, sender: self)
     }
     
 //    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChangeContentWith snapshot: NSDiffableDataSourceSnapshotReference) {

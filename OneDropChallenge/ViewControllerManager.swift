@@ -7,6 +7,7 @@
 
 import Foundation
 import UIKit
+import Combine
 
 class ViewControllerManager {
     
@@ -45,8 +46,9 @@ extension ViewControllerManager {
         return vc
     }
     
-    func charecterSearchResultsController() -> CharacterSearchResultsViewController {
+    func charecterSearchResultsController(searchSelection: PassthroughSubject<CharacterDTO, Never>) -> CharacterSearchResultsViewController {
         let vc = CharacterSearchResultsViewController()
+        vc.searchSelection = searchSelection
         return vc
     }
 }
