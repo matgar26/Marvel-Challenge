@@ -63,7 +63,6 @@ class CharecterListViewController: UIViewController {
         searchController.hidesNavigationBarDuringPresentation = false
         searchController.searchResultsUpdater = self
         searchController.searchBar.placeholder = "Seach Characters"
-//        searchController.searchBar.setImage(UIImage.searchIcon, for: .search, state: .normal)
     }
     
     @objc private func refreshAll() {
@@ -171,8 +170,12 @@ extension CharecterListViewController: UICollectionViewDelegate, NSFetchedResult
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         switch dataSource.itemIdentifier(for: indexPath) {
         case let character as CharacterDTO:
-            let vc = ViewControllerManager.shared.characterDetailViewController(character: character)
-            self.splitViewController?.showDetailViewController(vc, sender: self)
+            let cell = collectionView.cellForItem(at: indexPath) as? CharecterCollectionViewCell
+            cell?.animate() {
+                let vc = ViewControllerManager.shared.characterDetailViewController(character: character)
+                self.splitViewController?.showDetailViewController(vc, sender: self)
+            }
+
         default: break
         }
     }
