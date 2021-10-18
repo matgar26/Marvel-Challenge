@@ -34,7 +34,6 @@ class CharacterDetailViewController: UIViewController {
         imageView.contentMode = traitCollection.horizontalSizeClass == .regular ? .scaleAspectFill : .scaleAspectFit
         
         if let urlString = character.imageURL, let url = URL(string: urlString) {
-//            imageView.sd_setImage(with: url)
             SDWebImageDownloader.shared.downloadImage(with: url) { image, _, _, _ in
                 self.imageView.image = image?.sd_roundedCornerImage(withRadius: 6, corners: .allCorners, borderWidth: 2, borderColor: AppColor.marvelSecondary)
             }

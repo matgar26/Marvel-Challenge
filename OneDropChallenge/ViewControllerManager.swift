@@ -40,6 +40,10 @@ extension ViewControllerManager {
         return vc
     }
     
+    func characterDetailViewController(character: CharacterEntity) -> CharacterDetailViewController {
+        self.characterDetailViewController(character: CharacterDTO(from: character))
+    }
+    
     func characterDetailViewController(character: CharacterDTO) -> CharacterDetailViewController {
         let vc = loadScene(storyboard: Storyboards.Main, viewController: ViewControllers.Main.charecterDetail) as! CharacterDetailViewController
         vc.character = character

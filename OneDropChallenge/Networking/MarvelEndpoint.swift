@@ -46,6 +46,16 @@ extension MarvelService {
             .eraseToAnyPublisher()
     }
     
+//    func test() -> AnyPublisher<Bool, Never> {
+//        return apiSession.request(with: MarvelEndpoint.charecterList(offset: 0))
+//            .map
+//            .map(\.result)
+//            .map { list in
+//
+//            }
+//            .eraseToAnyPublisher()
+//    }
+    
     func searchCharecterList(search: String?) -> AnyPublisher<CharecterListWrapper, APIError> {
         return apiSession.request(with: MarvelEndpoint.searchCharecterList(search: search))
             .eraseToAnyPublisher()

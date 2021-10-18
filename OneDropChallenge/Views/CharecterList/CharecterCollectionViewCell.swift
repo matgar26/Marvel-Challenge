@@ -26,11 +26,22 @@ class CharecterCollectionViewCell: UICollectionViewCell {
         imageView.isSkeletonable = true
     }
     
-    func configure(with charecter: CharacterDTO) {
+    func configure(with character: CharacterDTO) {
         hideSkeleton()
-        nameLabel.text = charecter.name
+        nameLabel.text = character.name
 
-        if let urlString = charecter.imageURL, let url = URL(string: urlString) {
+        if let urlString = character.imageURL, let url = URL(string: urlString) {
+            imageView.sd_setImage(with: url)
+        } else {
+            imageView.sd_setImage(with: nil)
+        }
+    }
+    
+    func configure(with character: CharacterEntity) {
+        hideSkeleton()
+        nameLabel.text = character.name
+
+        if let urlString = character.imageUrl, let url = URL(string: urlString) {
             imageView.sd_setImage(with: url)
         } else {
             imageView.sd_setImage(with: nil)

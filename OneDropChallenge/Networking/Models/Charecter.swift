@@ -9,7 +9,7 @@ import Foundation
 import CoreData
 
 struct CharacterDTO: Decodable, Hashable {
-    var id: Int
+    var id: Int64
     var name: String?
     var description: String?
     var profileURL: String?
@@ -24,7 +24,7 @@ struct CharacterDTO: Decodable, Hashable {
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        id = try container.decode(Int.self, forKey: .id)
+        id = try container.decode(Int64.self, forKey: .id)
         name = try container.decodeIfPresent(.name)
 
         if let safeDescription: String = try container.decodeIfPresent(.description), !safeDescription.isEmpty {
@@ -41,26 +41,16 @@ struct CharacterDTO: Decodable, Hashable {
         profileURL = urls?.first(where: { $0.type == "detail" })?.url
     }
     
+    init(from entity: CharacterEntity) {
+        self.id = entity.id
+        self.name = entity.name
+        self.profileURL = entity.detailURL
+        self.description = entity.characterDescription
+        self.imageURL = entity.imageUrl
+    }
+    
     struct URLWrapper: Decodable {
         var type: String
         var url: String
-    }
-}
-
-
-class CharacterNSManagedObject: NSManagedObject {
- 
-    @NSManaged var id: NSNumber
-    @NSManaged var name: String?
-    @NSManaged var characterDescription: String?
-    @NSManaged var profileURL: String?
-    @NSManaged var imageURL: String?
-
-    func update(with character: CharacterDTO) {
-        self.id = NSNumber(value: character.id)
-        self.name = character.name
-        self.characterDescription = description
-        self.profileURL = character.profileURL
-        self.imageURL = character.imageURL
     }
 }

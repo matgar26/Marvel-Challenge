@@ -14,10 +14,21 @@ class CharecterListViewController: UIViewController {
     @IBOutlet weak var collectionView: UICollectionView!
     private var searchController: UISearchController!
     private var cancellables = [AnyCancellable?]()
-    private let viewModel: CharecterListViewModel = CharecterListViewModel()
+    
+    private lazy var viewModel: CharecterListViewModel = {
+        CharecterListViewModel(persistentContainer: appDelegate.persistentContainer)
+    }()
+    
     private lazy var dataSource = createDataSource()
+    private var fetchedResultsController: NSFetchedResultsController<CharacterEntity>!
     
     private var searchSelection = PassthroughSubject<CharacterDTO, Never>()
+        
+    private lazy var appDelegate: AppDelegate = {
+        UIApplication.shared.delegate as! AppDelegate
+    }()
+    
+    private lazy var moc: NSManagedObjectContext = appDelegate.persistentContainer.viewContext
     
     var searchTextTimer: Timer?
     var currentlySelectedIndex: IndexPath?
@@ -30,7 +41,7 @@ class CharecterListViewController: UIViewController {
         setupCollectionView()
         setBindings()
         
-        applySnapshot() // This will initially set our loading skeleton views
+        setupFetchedResultsController()
         refreshAll()
     }
     
@@ -50,6 +61,7 @@ class CharecterListViewController: UIViewController {
     private func setupCollectionView() {
         collectionView.collectionViewLayout = createCompositionalLayout()
         collectionView.delegate = self
+        collectionView.dataSource = dataSource
         
         let refresh = UIRefreshControl()
         refresh.addTarget(self, action: #selector(refreshAll), for: UIControl.Event.valueChanged)
@@ -62,11 +74,13 @@ class CharecterListViewController: UIViewController {
     private func setBindings() {
         let reloadCancellable = viewModel.reloadData.receive(on: DispatchQueue.main).sink() { [weak self] _ in
             self?.collectionView.refreshControl?.endRefreshing()
-            self?.applySnapshot(animatingDifferences: false)
+            try! self?.fetchedResultsController.performFetch()
         }
         
         let searchSelectionSubscriber = self.searchSelection.receive(on: DispatchQueue.main).sink() { [weak self] character in
-            self?.showCharacterDetail(character)
+            guard let self = self else { return }
+            let vc = ViewControllerManager.shared.characterDetailViewController(character: character)
+            self.splitViewController?.showDetailViewController(vc, sender: self)
         }
         
         cancellables.append(reloadCancellable)
@@ -81,7 +95,15 @@ class CharecterListViewController: UIViewController {
         searchController.searchBar.placeholder = "Seach Characters"
     }
     
+    private func setupFetchedResultsController() {
+        let fetchRequest = NSFetchRequest<CharacterEntity>(entityName:"CharacterEntity")
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "name", ascending:true)]
+        fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: moc, sectionNameKeyPath: nil, cacheName: nil)
+        fetchedResultsController.delegate = self
+    }
+    
     @objc private func refreshAll() {
+        applySnapshot()
         viewModel.refreshAll()
     }
 }
@@ -131,24 +153,25 @@ extension CharecterListViewController: UICollectionViewDelegate, NSFetchedResult
     typealias Snapshot = NSDiffableDataSourceSnapshot<CharecterListViewModel.DiffableDataSection, AnyHashable>
     
     func createDataSource() -> DataSource {
-        let dataSource = DataSource(collectionView: collectionView, cellProvider: { (collectionView, indexPath, item) -> UICollectionViewCell? in
+        let dataSource = DataSource(collectionView: collectionView, cellProvider: { [weak self] (collectionView, indexPath, item) -> UICollectionViewCell? in
             switch item {
             case is UUID:
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "LoadingCollectionViewCell", for: indexPath) as! LoadingCollectionViewCell
                 cell.startAnimating()
                 return cell
-            case let x as CharacterDTO:
-                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CharecterCollectionViewCell", for: indexPath) as! CharecterCollectionViewCell
-                cell.configure(with: x)
-                return cell
             case is SkeletonItem:
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CharecterCollectionViewCell", for: indexPath) as! CharecterCollectionViewCell
                 cell.configure()
                 return cell
-//            case let id as NSManagedObjectID:
-//                guard let object = try? managedObjectContext.existingObject(with: objectID) else {
-//                    fatalError("Managed object should be available")
-//                }
+            case let id as NSManagedObjectID:
+                guard let object = try? self?.moc.existingObject(with: id) as? CharacterEntity else {
+                    fatalError("Managed object should be available")
+                }
+                
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CharecterCollectionViewCell", for: indexPath) as! CharecterCollectionViewCell
+                cell.configure(with: object)
+                return cell
+
             default: fatalError()
             }
         })
@@ -185,40 +208,48 @@ extension CharecterListViewController: UICollectionViewDelegate, NSFetchedResult
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         switch dataSource.itemIdentifier(for: indexPath) {
-        case let character as CharacterDTO:
+        case let id as NSManagedObjectID:
+            guard let character = try? self.moc.existingObject(with: id) as? CharacterEntity else {
+                return
+            }
             currentlySelectedIndex = indexPath
-            self.showCharacterDetail(character)
+            let vc = ViewControllerManager.shared.characterDetailViewController(character: character)
+            self.splitViewController?.showDetailViewController(vc, sender: self)
         default: break
         }
     }
     
-    private func showCharacterDetail( _ character: CharacterDTO) {
-        let vc = ViewControllerManager.shared.characterDetailViewController(character: character)
-        self.splitViewController?.showDetailViewController(vc, sender: self)
-    }
     
-//    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChangeContentWith snapshot: NSDiffableDataSourceSnapshotReference) {
-//        guard let dataSource = collectionView?.dataSource as? DataSource else {
-//            assertionFailure("The data source has not implemented snapshot support while it should")
-//            return
-//        }
-//        
-//        var snapshot = snapshot as Snapshot
-//        let currentSnapshot = dataSource.snapshot() as Snapshot
-//        
-//        let reloadIdentifiers: [NSManagedObjectID] = snapshot.itemIdentifiers.compactMap { itemIdentifier in
-//            guard let identifier = itemIdentifier as? NSManagedObjectID, let currentIndex = currentSnapshot.indexOfItem(identifier), let index = snapshot.indexOfItem(identifier), index == currentIndex else {
-//                return nil
-//            }
-//            guard let existingObject = try? controller.managedObjectContext.existingObject(with: identifier), existingObject.isUpdated else { return nil }
-//            return identifier
-//        }
-//        
-//        snapshot.reloadItems(reloadIdentifiers)
-//        
-//        let shouldAnimate = collectionView?.numberOfSections != 0
-//        dataSource.apply(snapshot as Snapshot, animatingDifferences: shouldAnimate)
-//    }
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChangeContentWith snapshot: NSDiffableDataSourceSnapshotReference) {
+        guard let dataSource = collectionView?.dataSource as? DataSource else {
+            assertionFailure("The data source has not implemented snapshot support while it should")
+            return
+        }
+        
+        var snapshot = snapshot as Snapshot
+        let currentSnapshot = dataSource.snapshot() as Snapshot
+        
+        let reloadIdentifiers: [NSManagedObjectID] = snapshot.itemIdentifiers.compactMap { itemIdentifier in
+            guard let identifier = itemIdentifier as? NSManagedObjectID, let currentIndex = currentSnapshot.indexOfItem(identifier), let index = snapshot.indexOfItem(identifier), index == currentIndex else {
+                return nil
+            }
+            guard let existingObject = try? controller.managedObjectContext.existingObject(with: identifier), existingObject.isUpdated else { return nil }
+            return identifier
+        }
+        
+        snapshot.reloadItems(reloadIdentifiers)
+        
+        if viewModel.needsNewPage {
+            let id = UUID()
+            let section = CharecterListViewModel.DiffableDataSection.loadingSection(id)
+            snapshot.appendSections([section])
+            snapshot.appendItems([id], toSection: section)
+        }
+        if snapshot.itemIdentifiers.count > 0 {
+            let shouldAnimate = collectionView?.numberOfSections != 0
+            dataSource.apply(snapshot as Snapshot, animatingDifferences: shouldAnimate)
+        }
+    }
 }
 
 // MARK: - Compositional Layout
@@ -227,17 +258,14 @@ extension CharecterListViewController {
     private func createCompositionalLayout() -> UICollectionViewCompositionalLayout {
         let compLayout = UICollectionViewCompositionalLayout { [weak self] (section, layoutEnviroment) -> NSCollectionLayoutSection? in
             guard let self = self else { return nil }
-
             let traitCollection = layoutEnviroment.traitCollection
-
-            switch self.viewModel.sections[section] {
-            case .charecterSection( _), .skeletonSection( _):
-                return self.createCharecterSection(traitCollection: traitCollection)
+            switch self.dataSource.sectionIdentifier(for: section) {
             case .loadingSection(_):
                 return self.createLoadingSection()
+            default:
+                return self.createCharecterSection(traitCollection: traitCollection)
             }
         }
-        
         return compLayout
     }
     
