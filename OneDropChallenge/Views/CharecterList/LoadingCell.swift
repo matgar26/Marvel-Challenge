@@ -22,9 +22,7 @@ final class LoadingCollectionViewCell: UICollectionViewCell {
     override init(frame: CGRect) {
         super.init(frame: frame)
 
-        activityIndicatorView.translatesAutoresizingMaskIntoConstraints = false
-//        activityIndicatorView.color = AppColor.tint
-        
+        activityIndicatorView.translatesAutoresizingMaskIntoConstraints = false        
         contentView.addSubview(activityIndicatorView)
 
         NSLayoutConstraint.activate([

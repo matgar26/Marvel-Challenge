@@ -17,7 +17,6 @@
 		3C11CE3C271017AE0074625A /* OneDropChallengeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C11CE3B271017AE0074625A /* OneDropChallengeTests.swift */; };
 		3C11CE46271017AE0074625A /* OneDropChallengeUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C11CE45271017AE0074625A /* OneDropChallengeUITests.swift */; };
 		3C11CE48271017AE0074625A /* OneDropChallengeUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C11CE47271017AE0074625A /* OneDropChallengeUITestsLaunchTests.swift */; };
-		3C523F342718081D0025AB6D /* CoreDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C523F332718081D0025AB6D /* CoreDataManager.swift */; };
 		3C523F38271A45E60025AB6D /* CharacterSearchResultsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C523F36271A45E60025AB6D /* CharacterSearchResultsViewController.swift */; };
 		3C523F39271A45E60025AB6D /* CharacterSearchResultsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3C523F37271A45E60025AB6D /* CharacterSearchResultsViewController.xib */; };
 		3C523F3B271A72F40025AB6D /* CharacterSearchResultsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C523F3A271A72F40025AB6D /* CharacterSearchResultsViewModel.swift */; };
@@ -74,7 +73,6 @@
 		3C11CE41271017AE0074625A /* OneDropChallengeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OneDropChallengeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3C11CE45271017AE0074625A /* OneDropChallengeUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OneDropChallengeUITests.swift; sourceTree = "<group>"; };
 		3C11CE47271017AE0074625A /* OneDropChallengeUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OneDropChallengeUITestsLaunchTests.swift; sourceTree = "<group>"; };
-		3C523F332718081D0025AB6D /* CoreDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataManager.swift; sourceTree = "<group>"; };
 		3C523F36271A45E60025AB6D /* CharacterSearchResultsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CharacterSearchResultsViewController.swift; sourceTree = "<group>"; };
 		3C523F37271A45E60025AB6D /* CharacterSearchResultsViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = CharacterSearchResultsViewController.xib; sourceTree = "<group>"; };
 		3C523F3A271A72F40025AB6D /* CharacterSearchResultsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CharacterSearchResultsViewModel.swift; sourceTree = "<group>"; };
@@ -150,11 +148,11 @@
 			children = (
 				3C11CE32271017AD0074625A /* Info.plist */,
 				3C11CE2F271017AD0074625A /* LaunchScreen.storyboard */,
-				3CDF63AE27139D4A00AD737F /* Extensions */,
-				3CDF63AB27138C2F00AD737F /* CoreData */,
 				3CDF63A72712A36600AD737F /* App Files */,
-				3CDF63A1271298EE00AD737F /* Networking */,
 				3CDF63B12713D9E100AD737F /* Resources */,
+				3CDF63AB27138C2F00AD737F /* CoreData */,
+				3CDF63A1271298EE00AD737F /* Networking */,
+				3CDF63AE27139D4A00AD737F /* Extensions */,
 				3CDF63B92713DBC800AD737F /* Styles */,
 				3CDF63B22713D9FC00AD737F /* Views */,
 				3CCDE89B271554D7005316BA /* ViewControllerManager.swift */,
@@ -246,7 +244,6 @@
 			isa = PBXGroup;
 			children = (
 				3C11CE2A271017AC0074625A /* OneDropChallenge.xcdatamodeld */,
-				3C523F332718081D0025AB6D /* CoreDataManager.swift */,
 			);
 			path = CoreData;
 			sourceTree = "<group>";
@@ -434,7 +431,6 @@
 				3CDF63A527129BC400AD737F /* MarvelEndpoint.swift in Sources */,
 				3C11CE22271017AC0074625A /* AppDelegate.swift in Sources */,
 				3CDF63AD271399E400AD737F /* Charecter.swift in Sources */,
-				3C523F342718081D0025AB6D /* CoreDataManager.swift in Sources */,
 				3C523F3B271A72F40025AB6D /* CharacterSearchResultsViewModel.swift in Sources */,
 				3CDF63B52713DA3B00AD737F /* CharecterCollectionViewCell.swift in Sources */,
 				3CCDE8A22715CA88005316BA /* CharacterDetailViewController.swift in Sources */,
